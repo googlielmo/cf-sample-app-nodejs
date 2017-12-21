@@ -2,11 +2,34 @@
 module.exports = {
     new_hazelcast_client: function (callback) {
         if (process.env.VCAP_SERVICES) {
+            var winston = require('winston');
+
             var Client = require('hazelcast-client').Client;
             var Config = require('hazelcast-client').Config;
             var Address = require('hazelcast-client').Address;
-
             var clientConfig = new Config.ClientConfig();
+
+            var winstonAdapter = {
+                logger: new (winston.Logger)({
+                    level: 'debug',
+                    transports: [
+                        new (winston.transports.Console)()
+                    ]
+                }),
+
+                levels: [
+                    'error',
+                    'warn',
+                    'info',
+                    'debug',
+                    'silly'
+                ],
+
+                log: function(level, className, message, furtherInfo) {
+                    this.logger.log(this.levels[level], '(@winstonAdapter) ' + className + ' ' + message);
+                }
+            };
+            clientConfig.properties['hazelcast.logging'] = winstonAdapter;
 
             var servicesJson = JSON.parse(process.env.VCAP_SERVICES);
             var hazelcast = servicesJson.hazelcast;
