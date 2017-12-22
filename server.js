@@ -6,7 +6,6 @@ var hz_client = require('./app/hazelcast_client')
 var hazelcastClient;
 
 hz_client.new_hazelcast_client(function (c) {
-    console.log('new_hazelcast_client returned with ' + c);
     hazelcastClient = c;
 });
 
@@ -30,16 +29,16 @@ app.get('/', function (req, res) {
 })
 
 app.get('/get', function (req, res) {
-    console.log("/get : " + hazelcastClient);
     hazelcastClient.getMap("test").get(req.query.key).then(function (v) {
-        res.send(v);
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(v));
     });
 });
 
 app.get('/put', function (req, res) {
-    console.log("/put : " + hazelcastClient);
     hazelcastClient.getMap("test").put(req.query.key, req.query.value).then(function (v) {
-        res.send(v);
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(v));
     });
 });
 
